@@ -24,7 +24,9 @@ Note that this has nothing to do with the mailing list majordomo:
 > and service-oriented request-reply processing. It originated from the
 > Majordomo pattern defined in Chapter 4 of the Guide.
 
-This is a thin Clojure wrapper around the Java implementation.
+This is a thin Clojure wrapper around the Java implementation. I
+started a pure Clojure implementation, but this works right now.
+
 
 ## License
 
