@@ -12,25 +12,35 @@
     (Client. endpoint verbose (mdcliapi2. endpoint verbose) false)
     (Client. endpoint verbose (mdcliapi. endpoint verbose) false)))
 
-(defn send*
-  "Sends a request given a Client record, a service name an a ZMsg request."
-  [^Client this ^String service ^ZMsg request]
-  (.send (:client this) service request))
+(defmulti send! (fn [client service request] (class request)))
 
-(defn send-strings
-  "Sends a request given a Client record, a service name a sequence of strings."
-  [^Client this ^String service strings]
-  (let [request (ZMsg.)]
-    (doseq [s strings]
-      (.addString request s))
-      (.send (:client this) service request)))
+(defmethod send! ZMsg [client service request]
+  (.send (:client client) service request))
 
-(defn recv*
+(defmethod send! String [client service request]
+  (let [r (.. (ZMsg.) (.addString request))]
+    (.send (:client client) service r)))
+
+;; XXX: can these two be collapsed based?
+;; XXX: need to check that each element is a string and coerce if it isn't
+(defmethod send! clojure.lang.PersistentVector [client service request]
+  (let [r (ZMsg.)]
+    (doseq [s request]
+      (.addString r s))
+    (.send (:client client) service r)))
+
+(defmethod send! clojure.lang.PersistentList [client service request]
+  (let [r (ZMsg.)]
+    (doseq [s request]
+      (.addString r s))
+    (.send (:client client) service r)))
+
+(defn recv
   "Receive from an asynchronous request."
   [this]
   (.recv (:client this)))
 
-(defn destroy*
+(defn destroy
   "Destroy the Client."
   [this]
   (.destroy (:client this)))

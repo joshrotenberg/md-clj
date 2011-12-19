@@ -1,7 +1,7 @@
 (ns md-clj.test.http
-  (:use md-clj.broker
-        md-clj.worker
-        md-clj.client)
+  (:require [md-clj.broker :only [start-broker] :as mdb]
+            [md-clj.worker :only [new-worker run] :as mdw]
+            [md-clj.client :only [new-client send!] :as mdc])
   (:use [clojure.contrib.duck-streams :only [slurp*]])
   (:use [compojure.core :only [defroutes GET POST]]
         [ring.adapter.jetty :only [run-jetty]])
@@ -21,10 +21,10 @@
 
 ;; the echo worker itself
 (def echo-http-worker
-  (new-worker "echo-http" "tcp://localhost:5555" false echo-handler))
+  (mdw/new-worker "echo-http" "tcp://localhost:5555" false echo-handler))
 
 ;; the client
-(def echo-http-md-client (new-client "tcp://localhost:5555" false))
+(def echo-http-md-client (mdc/new-client "tcp://localhost:5555" false))
 
 ;; at this point we have a complete echo system for the backend.
 
@@ -35,7 +35,7 @@
   (let [body (slurp* (:body request))
         request (ZMsg.)
         _ (.addString request body)
-        reply (send* echo-http-md-client "echo-http" request)]
+        reply (mdc/send! echo-http-md-client "echo-http" request)]
     (-> (.toArray reply)
         first
         .getData
@@ -48,9 +48,9 @@
 
 (deftest http-test
   ;; start the broker
-  (future (start-broker "tcp://*:5555" false))
+  (future (mdb/start-broker "tcp://*:5555" false))
   ;; start the worker
-  (future (run echo-http-worker))
+  (future (mdw/run echo-http-worker))
   ;; and start the http front end
   (future (run-jetty routes {:port 5556}))
   
@@ -58,7 +58,7 @@
   (doseq [x random-strings]
     (let [request (ZMsg.)
           _ (.addString request x)
-          reply (send* echo-http-md-client "echo-http" request)]
+          reply (mdc/send! echo-http-md-client "echo-http" request)]
       (is (= x (-> (.toArray reply)
                    first
                    .getData

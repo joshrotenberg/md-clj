@@ -1,13 +1,13 @@
 (ns md-clj.test.reverse
-  (:use md-clj.broker
-        md-clj.worker
-        md-clj.client)
   (:use clojure.test
         re-rand)
+  (:require [md-clj.broker :only [start-broker] :as mdb]
+            [md-clj.worker :only [new-worker run] :as mdw]
+            [md-clj.client :only [new-client send!] :as mdc])
   (:import org.zeromq.ZMsg))
 
 ;; start our broker in a future 
-(future (start-broker "tcp://*:5555" false))
+(future (mdb/start-broker "tcp://*:5555" false))
 
 (defn reverse-fn
   [req rep]
@@ -15,12 +15,12 @@
     (.addString rep (apply str (reverse (String. (.getData f)))))))
 
 (deftest reverse-test
-  (let [reverse-worker (new-worker
+  (let [reverse-worker (mdw/new-worker
                         "reverse" "tcp://localhost:5555" false reverse-fn)
-        reverse-client (new-client "tcp://localhost:5555" false)]
+        reverse-client (mdc/new-client "tcp://localhost:5555" false)]
     
-    (future (run reverse-worker))
-    (let [reply (send-strings reverse-client "reverse" ["bar" "foo"])]
+    (future (mdw/run reverse-worker))
+    (let [reply (mdc/send! reverse-client "reverse" ["bar" "foo"])]
       (is (= "rab" (-> (.toArray reply)
                        first
                        .getData
