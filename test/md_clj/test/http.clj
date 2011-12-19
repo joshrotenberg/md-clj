@@ -1,17 +1,16 @@
-(ns bsa.test.md.http
-  (:use bsa.md.broker
-        bsa.md.worker
-        bsa.md.client)
+(ns md-clj.test.http
+  (:use md-clj.broker
+        md-clj.worker
+        md-clj.client)
   (:use [clojure.contrib.duck-streams :only [slurp*]])
   (:use [compojure.core :only [defroutes GET POST]]
         [ring.adapter.jetty :only [run-jetty]])
   (:use clojure.test
-        bsa.test.util
         re-rand)
   (:require [clj-http.client :as http-client])
   (:import org.zeromq.ZMsg))
 
-;; this quick test puts an http front end on a client/broker/worker
+;; this test puts an http front end on a client/broker/worker
 
 
 ;; this  is the worker function. it just echos any frames from the request
@@ -53,21 +52,19 @@
   ;; start the worker
   (future (run echo-http-worker))
   ;; and start the http front end
-  (future (run-jetty routes {:port 8080}))
-
+  (future (run-jetty routes {:port 5556}))
+  
   ;; first just test the backend directly
-  (time
   (doseq [x random-strings]
     (let [request (ZMsg.)
-        _ (.addString request x)
+          _ (.addString request x)
           reply (send* echo-http-md-client "echo-http" request)]
       (is (= x (-> (.toArray reply)
                    first
                    .getData
-                   String.))))))
-
+                   String.)))))
+  
   ;; now test it through the http front end
-  (time
   (doseq [x random-strings]
-    (is (= x (:body (http-client/post "http://localhost:8080/echo" {:body x}))))
-  )))
+    (is (= x (:body (http-client/post "http://localhost:5556/echo" {:body x}))))
+    ))
