@@ -10,7 +10,7 @@
 
 (defn random-strings-fixture
   [f]
-  (def random-strings (repeatedly 500 #(re-rand #"[A-Za-z0-9]{20}")))
+  (def random-strings (repeatedly 1000 #(re-rand #"[A-Za-z0-9]{20}")))
   (f)
   ())
 
@@ -35,6 +35,8 @@
       (let [request (ZMsg.)
             _ (.addString request x)
             reply (send* echo-client "echo" request)]
+        ;;reply2 (send2 echo-client "echo" (list x))]
+        
         (is (= x (-> (.toArray reply)
                            first
                            .getData

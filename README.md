@@ -38,6 +38,13 @@ availability to do some work with the broker. Clients connect to the
 broker and give it the name of the work to do and some data upon which
 to 'work' on, and wait for a response.
 
+This generic pattern is pretty darn useful in a lot of situations. It
+scales well and works in sitations where you want either/both
+request/reply or queue'ed jobs that don't require a reply. Couple with
+some kind of persistent storage like MongoDB and a more complex
+payload type like JSON or Protocol Buffers, you can build stuff that's
+pretty cool.
+
 For now this wrapper isn't very sophisticated, but it is fairly easy
 to use all three components. It's also easy to use them all in the
 same file for testing, and split them into separate processes later
@@ -75,6 +82,15 @@ once things are working:
 
 )
 ```
+
+## Examples
+
+For now see the tests. There is a simple echo test as well as a test
+that puts an HTTP layer in front of the broker using ring/compojure. 
+
+## TODO
+* Request/reply handling should be wrapped up a little instead of using ZMsg directly.
+
 
 ## License
 
