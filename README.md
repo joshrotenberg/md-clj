@@ -94,13 +94,13 @@ once things are working.
 There are two ways to use both the client and worker side: a more raw
 API that gives you pretty close access to the underlying Java
 implementation and a slightly more cooked API that looks more like a
-fancy DSL. You can mix and match, using one for the client and another
-for the worker without issue. Note also that 0MQ's cross language
-capability is a high point, so you should be able to easily write,
-say, your workers in Clojure and your clients in PHP/Java/Lua/C/C++
-(that's the list of language I see with an example Majordomo API
-already written in they guide, but any language that has 0MQ bindings
-would work with a little effort).
+fancy DSL (see the first example above). You can mix and match, using
+one for the client and another for the worker without issue. Note also
+that 0MQ's cross language capability is a high point, so you should be
+able to easily write, say, your workers in Clojure and your clients in
+PHP/Java/Lua/C/C++ (that's the list of language I see with an example
+Majordomo API already written in they guide, but any language that has
+0MQ bindings would work with a little effort).
 
 ```clojure
 (ns my.app
