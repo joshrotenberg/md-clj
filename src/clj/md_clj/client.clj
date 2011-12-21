@@ -1,4 +1,5 @@
 (ns md-clj.client
+  "Majordomo Client"
   (:import mdcliapi
            mdcliapi2
            org.zeromq.ZMsg))
@@ -18,10 +19,11 @@
   (.send (:client client) service request))
 
 (defmethod send! String [client service request]
-  (let [r (.. (ZMsg.) (.addString request))]
+  (let [r (ZMsg.)
+        _ (.addString r request)]
     (.send (:client client) service r)))
 
-;; XXX: can these two be collapsed based?
+;; XXX: can these two functions be based on a superclass of PV and PL?
 ;; XXX: need to check that each element is a string and coerce if it isn't
 (defmethod send! clojure.lang.PersistentVector [client service request]
   (let [r (ZMsg.)]

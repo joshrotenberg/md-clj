@@ -91,6 +91,9 @@ that puts an HTTP layer in front of the broker using ring/compojure.
 ## TODO
 * Request/reply handling should be wrapped up a little instead of using ZMsg directly.
 
+## Status
+
+* Changing a lot.
 
 ## License
 

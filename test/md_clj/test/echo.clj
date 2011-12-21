@@ -31,11 +31,9 @@
     
     (future (mdw/run echo-worker))
     (time
-    (doseq [x random-strings]
-      (let [request (ZMsg.)
-            _ (.addString request x)
-            reply (mdc/send! echo-client "echo" request)]
-        
+     (doseq [x random-strings]
+       (let [reply (mdc/send! echo-client "echo" x)]
+         
         (is (= x (-> (.toArray reply)
                      first
                      .getData
@@ -80,9 +78,7 @@
 
     (time
     (doseq [x random-strings]
-      (let [request (ZMsg.)
-            _ (.addString request x)
-            reply (mdc/send! echo-client "echo-multi" request)]
+      (let [reply (mdc/send! echo-client "echo-multi" x)]
         (is (= x (-> (.toArray reply)
                            first
                            .getData
