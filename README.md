@@ -7,11 +7,46 @@
 This is a wrapper for [this](http://rfc.zeromq.org/spec:7) around the
 relevant classes
 [here](https://github.com/imatix/zguide/tree/master/examples/Java) by
-Arkadiusz Orzechowski. Arkadiusz's code is included here directly with
-only one small modification: the bind method in mdbroker.java has been
-declared public instead of private as it exists in the imatix/zguide
-repo.
+Arkadiusz Orzechowski. md-clj lets you create a request-reply service
+architecture without too much ceremony:
 
+```clojure
+;; the main app
+(ns my.app.core
+    (:requite md-clj.broker))
+
+(defn -main
+      [& args]
+      (start-broker "tcp://*:5555" false))
+
+;; the worker
+(ns my.app.worker
+    (:require md-clj.worker))
+
+(defn reverse-task
+      [input]
+      (apply str (reverse (String. input))))
+
+(def -main 
+     [& args]
+     (as-worker :reverse-string "tcp://localhost:5555"
+               (reverse-task request)) ;; request is magically available
+)	       
+
+;; the client
+(ns my.app.client
+    (:require md-clj.client))
+
+(defn -main 
+      [& args]
+      (let [reply (as-client :reverse-string "tcp://localhost:5555"
+      	   	    ;; do various things and return a string to reverse
+		    "reverse me")]
+	(println reply) ;; prints "em esrever"
+	))
+
+    
+```
 ## 0MQ Majordomo
 
 See:
