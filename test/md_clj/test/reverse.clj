@@ -52,16 +52,11 @@
     
     (let [reply-one (mdc/as-client :reverse-one ep "bleh")
           reply-more (mdc/as-client :reverse-more ep '("one" "two"))]
-      
-      (is (= "helb" (-> (.toArray reply-one)
-                        first
-                        .toString)))
-      
-      (is (= "eno" (-> (.toArray reply-more)
-                       first
-                       .toString)))
-      (is (= "owt" (-> (.toArray reply-more)
-                       second
-                       .toString))))))
+
+      ;; the return values are either a single byte array or a sequence
+      ;; of byte arrays, depending on the worker itself
+      (is (= "helb" (String. reply-one)))
+      (is (= "eno" (String. (first reply-more))))
+      (is (= "owt" (String. (second reply-more)))))))
       
 

@@ -74,19 +74,17 @@ once things are working:
 
 (let [request (ZMsg.)
       _ (.addString request "some string")
-      reply (send* echo-client "echo" request)]
+      reply (send! echo-client "echo" request)]
    (is (= "some string" (-> (.toArray reply)
                        first
-                       .getData
-                        String.)))
+                       .toString))))
 
-)
 ```
 
 ## Examples
 
 For now see the tests. There is a simple echo test as well as a test
-that puts an HTTP layer in front of the broker using ring/compojure. 
+that puts an HTTP layer in front of the broker using ring/compojure.
 
 ## TODO
 * Request/reply handling should be wrapped up a little instead of using ZMsg directly.

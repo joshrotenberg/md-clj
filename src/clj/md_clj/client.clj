@@ -52,8 +52,10 @@
 (defmacro as-client
   [service endpoint & body]
   `(let [client# (new-client-memoize ~endpoint false)
-         req# (do ~@body)
-         res# (send! client# (name ~service) req#)]
-     res#))
+         request# (do ~@body)
+         response# (send! client# (name ~service) request#)]
+     (if (> (.size response#) 1)
+       (map #(.getData %) (.toArray response#))
+       (.getData (.getFirst response#)))))
 
 

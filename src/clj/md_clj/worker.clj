@@ -33,7 +33,6 @@
 
  (defmacro as-worker
    [service endpoint & body]
-   ;;`(let [worker# (new-worker (name ~service) ~endpoint false nil)
    `(let [worker# (mdwrkapi. ~endpoint (name ~service) false)
           reply# (ZMsg.)]
       (while (not (.isInterrupted (Thread/currentThread)))
