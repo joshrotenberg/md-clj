@@ -2,7 +2,7 @@
   "Majordomo Client"
   (:import mdcliapi
            mdcliapi2
-           org.zeromq.ZMsg))
+           [org.zeromq ZMsg ZFrame]))
 
 (defrecord Client [^String endpoint ^Boolean verbose ^mdcliapi client async])
 
@@ -15,6 +15,9 @@
 
 (def new-client-memoize (memoize new-client))
 
+(derive clojure.lang.PersistentVector ::collection)
+(derive clojure.lang.PersistentList ::collection)
+
 (defmulti send! (fn [client service request] (class request)))
 
 (defmethod send! ZMsg [client service request]
@@ -22,21 +25,18 @@
 
 (defmethod send! String [client service request]
   (let [r (ZMsg.)
-        _ (.addString r request)]
+        _ (.add r (ZFrame. request))]
     (.send (:client client) service r)))
 
-;; XXX: can these two functions be based on a superclass of PV and PL?
-;; XXX: need to check that each element is a string and coerce if it isn't
-(defmethod send! clojure.lang.PersistentVector [client service request]
-  (let [r (ZMsg.)]
-    (doseq [s request]
-      (.addString r s))
+(defmethod send! (Class/forName "[B") [client service request]
+  (let [r (ZMsg.)
+        _ (.add r (ZFrame. request))]
     (.send (:client client) service r)))
 
-(defmethod send! clojure.lang.PersistentList [client service request]
+(defmethod send! ::collection [client service request]
   (let [r (ZMsg.)]
     (doseq [s request]
-      (.addString r s))
+      (.add r (ZFrame. s)))
     (.send (:client client) service r)))
 
 (defn recv
