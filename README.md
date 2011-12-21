@@ -14,9 +14,13 @@ repo.
 
 ## 0MQ Majordomo
 
-See http://rfc.zeromq.org/spec:7 and http://zguide.zeromq.org/page:all#Service-Oriented-Reliable-Queuing-Majordomo-Pattern
+See:
+* http://rfc.zeromq.org/spec:7 
+* http://zguide.zeromq.org/page:all#Service-Oriented-Reliable-Queuing-Majordomo-Pattern
 
-Note that this has nothing to do with the mailing list majordomo:
+for the "possibly too long; (but) did read" explanation of the Majordomo system.
+
+Note that this has nothing to do with the mailing list called Majordomo:
 
 > The Majordomo Protocol (MDP) defines a reliable service-oriented
 > request-reply dialog between a set of client applications, a broker
@@ -24,8 +28,10 @@ Note that this has nothing to do with the mailing list majordomo:
 > and service-oriented request-reply processing. It originated from the
 > Majordomo pattern defined in Chapter 4 of the Guide.
 
-This is a thin Clojure wrapper around the Java implementation. I
-started a pure Clojure implementation, but this works right now.
+"the Guide" here refers to the insanely complete and useful guide to 0MQ: http://zguide.zeromq.org/
+
+This is a Clojure wrapper around the Java implementation. I started a
+pure Clojure implementation, but this works right now.
 
 ## Usage
 
@@ -48,7 +54,18 @@ pretty cool.
 For now this wrapper isn't very sophisticated, but it is fairly easy
 to use all three components. It's also easy to use them all in the
 same file for testing, and split them into separate processes later
-once things are working:
+once things are working. 
+
+There are two ways to use both the client and worker side: a more raw
+API that gives you pretty close access to the underlying Java
+implementation and a slightly more cooked API that looks more like a
+fancy DSL. You can mix and match, using one for the client and another
+for the worker without issue. Note also that 0MQ's cross language
+capability is a high point, so you should be able to easily write,
+say, your workers in Clojure and your clients in PHP/Java/Lua/C/C++
+(that's the list of language I see with an example Majordomo API
+already written in they guide, but any language that has 0MQ bindings
+would work with a little effort).
 
 ```clojure
 (ns my.app
@@ -66,12 +83,13 @@ once things are working:
                      (fn [request reply]
                        (doall (map #(.add reply %) (.toArray request))))))
 
-;; run the worker
+;; and run the worker
 (future (run echo-worker))
 
 ;; create a client
 (def echo-client (new-client "tcp://localhost:5555" *verbose*))
 
+;; send a request, and view the response
 (let [request (ZMsg.)
       _ (.addString request "some string")
       reply (send! echo-client "echo" request)]
@@ -83,8 +101,10 @@ once things are working:
 
 ## Examples
 
-For now see the tests. There is a simple echo test as well as a test
-that puts an HTTP layer in front of the broker using ring/compojure.
+See the tests. Most are written as useful examples:
+* echo - the standard echo scenario served up a few different ways
+* reverse - standard and DSL APIs to create some reverse worker examples
+* http - an http frontended parallel echo system
 
 ## TODO
 * Request/reply handling should be wrapped up a little instead of using ZMsg directly.
@@ -96,5 +116,6 @@ that puts an HTTP layer in front of the broker using ring/compojure.
 ## License
 
 Copyright (C) 2011 Josh Rotenberg
+Portions (C)  2011 Arkadiusz Orzechowski
 
 Distributed under the Eclipse Public License, the same as Clojure.
