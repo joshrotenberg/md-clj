@@ -13,6 +13,8 @@
     (Client. endpoint verbose (mdcliapi2. endpoint verbose) false)
     (Client. endpoint verbose (mdcliapi. endpoint verbose) false)))
 
+(def new-client-memoize (memoize new-client))
+
 (defmulti send! (fn [client service request] (class request)))
 
 (defmethod send! ZMsg [client service request]
@@ -47,5 +49,11 @@
   [this]
   (.destroy (:client this)))
 
+(defmacro as-client
+  [service endpoint & body]
+  `(let [client# (new-client-memoize ~endpoint false)
+         req# (do ~@body)
+         res# (send! client# (name ~service) req#)]
+     res#))
 
 

@@ -29,26 +29,34 @@
                        second
                        .getData
                        String.))))))
-;; another way to create a worker in a more DSL'y style.
 
-(deftest as-worker-test
-  (let [reverse-client (mdc/new-client "tcp://localhost:5555" false)]
+;; another way to create a client and worker in a more DSL'y style.
 
-    ;; this worker expects a scalar request an returns a scalar reply
-    (future (mdw/as-worker "reverse-one" "tcp://localhost:5555"
-                           (apply str (reverse (String. request)))))
 
-    ;; this worker expects a sequence request and returns a sequence reply
-    (future (mdw/as-worker "reverse-more" "tcp://localhost:5555"
-                           (map #(apply str (reverse (String. %))) request)))
+;; as-client takes a service name keyword, an endpoint, and the body should
+;; return a request. the call itself will return the worker's response
+
+(deftest as-test
+  (let [ep "tcp://localhost:5555"]
+    ;; as-worker takes a service name keyword, an endpoint, and then
+    ;; the body is the actual service function
     
-    (let [reply-one (mdc/send! reverse-client "reverse-one" "bleh")
-          reply-more (mdc/send! reverse-client "reverse-more" '("one" "two"))]
-
+    ;; this worker expects a scalar request an returns a scalar reply
+    (future (mdw/as-worker :reverse-one ep
+                           (apply str (reverse (String. request)))))
+    
+    ;; this worker expects a sequence request and returns a sequence reply
+    (future (mdw/as-worker :reverse-more ep
+                           (map #(apply str (reverse (String. %))) request)))
+  
+    
+    (let [reply-one (mdc/as-client :reverse-one ep "bleh")
+          reply-more (mdc/as-client :reverse-more ep '("one" "two"))]
+      
       (is (= "helb" (-> (.toArray reply-one)
                         first
                         .toString)))
-
+      
       (is (= "eno" (-> (.toArray reply-more)
                        first
                        .toString)))
@@ -56,7 +64,4 @@
                        second
                        .toString))))))
       
-
-
-
 

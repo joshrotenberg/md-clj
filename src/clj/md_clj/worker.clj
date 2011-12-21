@@ -33,7 +33,8 @@
 
  (defmacro as-worker
    [service endpoint & body]
-   `(let [worker# (mdwrkapi. ~endpoint ~service false)
+   ;;`(let [worker# (new-worker (name ~service) ~endpoint false nil)
+   `(let [worker# (mdwrkapi. ~endpoint (name ~service) false)
           reply# (ZMsg.)]
       (while (not (.isInterrupted (Thread/currentThread)))
         (let [requezt# (.receive worker# reply#)
@@ -44,18 +45,5 @@
           (if (seq? repli#)
             (doall (map #(.add reply# (ZFrame. %)) repli#))
             (.add reply# (ZFrame. repli#)))))))
-
-;; (defmacro defworker
-;;   [service endpoint & body]
-;;   `(fn [& args#]
-;;      (let [worker# (mdwrkapi. ~endpoint (name ~service) false)
-;;            reply# (ZMsg.)]
-;;        (while (not (.isInterrupted (Thread/currentThread)))
-;;          (let [requezt# (.receive worker# reply#)
-;;                ~'request (map #(.toString %) (.toArray requezt#))
-;;                repli# (do ~@body)]
-;;            (if (seq? repli#)
-;;              (doall (map #(.add reply# (ZFrame. %) repli#)))
-;;              (.add reply# (ZFrame. repli#))))))))
   
                
