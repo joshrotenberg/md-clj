@@ -138,7 +138,7 @@ Majordomo API already written in they guide, but any language that has
 
 See the tests. Most are written as useful examples:
 * echo - the standard echo scenario served up a few different ways
-* reverse - standard and DSL APIs to create some reverse worker examples
+* reverse - standard and DSL APIs to create some reverse worker examples, lots of comments too
 * http - an http frontended parallel echo system
 
 ## TODO
@@ -150,7 +150,7 @@ See the tests. Most are written as useful examples:
 
 ## License
 
-Copyright (C) 2011 Josh Rotenberg
-Portions (C)  2011 Arkadiusz Orzechowski
+* Copyright (C) 2011 Josh Rotenberg
+* Portions (C) 2011 Arkadiusz Orzechowski
 
 Distributed under the Eclipse Public License, the same as Clojure.

@@ -7,7 +7,7 @@
 
 (defn new-worker
   [service endpoint function]
-  (Worker. service endpoint *worker-debug* function))
+  (Worker. (name service) endpoint *worker-debug* function))
 
 (defn run
   "Run the worker."

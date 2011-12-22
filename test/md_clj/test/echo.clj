@@ -22,7 +22,7 @@
 
 (deftest echo-test
   (let [echo-worker (mdw/new-worker
-                     "echo" "tcp://localhost:5555"
+                     :echo "tcp://localhost:5555"
                      (fn [request reply]
                        (doall (map #(.add reply %) (.toArray request)))))
         echo-client (mdc/new-client "tcp://localhost:5555")]
@@ -30,7 +30,7 @@
     (future (mdw/run echo-worker))
     (time
      (doseq [x random-strings]
-       (let [reply (mdc/send! echo-client "echo" x)]
+       (let [reply (mdc/send! echo-client :echo x)]
          
         (is (= x (-> (.toArray reply)
                      first
@@ -41,7 +41,7 @@
 ;; all the results
 (deftest echo-async-test
   (let [echo-async-worker (mdw/new-worker
-                           "echo-async" "tcp://localhost:5555"
+                           :echo-async "tcp://localhost:5555"
                            (fn [request reply]
                        (doall (map #(.add reply %)  (.toArray request)))))
         echo-async-client (mdc/new-client "tcp://localhost:5555" true)]
@@ -51,7 +51,7 @@
   (doseq [x random-strings]
     (let [request (ZMsg.)
           _ (.addString request x)]
-      (mdc/send! echo-async-client "echo-async" request)))
+      (mdc/send! echo-async-client :echo-async request)))
 
   (doseq [x random-strings]
     (let [reply (mdc/recv echo-async-client)]
@@ -63,7 +63,7 @@
 (deftest echo-multi-test
   (let [echo-workers (repeat 10 
                        (mdw/new-worker
-                        "echo-multi"
+                        :echo-multi
                         "tcp://localhost:5555"
                         (fn [request reply]
                           ;;(Thread/sleep 500)
@@ -76,7 +76,7 @@
 
     (time
     (doseq [x random-strings]
-      (let [reply (mdc/send! echo-client "echo-multi" x)]
+      (let [reply (mdc/send! echo-client :echo-multi x)]
         (is (= x (-> (.toArray reply)
                            first
                            .getData

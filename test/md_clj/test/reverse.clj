@@ -17,11 +17,11 @@
 
 (deftest reverse-test
   (let [reverse-worker (mdw/new-worker
-                        "reverse" "tcp://localhost:5555" reverse-fn)
+                        :reverse "tcp://localhost:5555" reverse-fn)
         reverse-client (mdc/new-client "tcp://localhost:5555")]
     
     (future (mdw/run reverse-worker))
-    (let [reply (mdc/send! reverse-client "reverse" ["bar" "foo"])]
+    (let [reply (mdc/send! reverse-client :reverse ["bar" "foo"])]
       (is (= "rab" (-> (.toArray reply)
                        first
                        .getData
@@ -70,14 +70,20 @@
                                                               "two"])
           ;; async clients work similarly with the following exceptions:
           ;; each element in the collection is sent independently, and all
-          ;; elements are sent immediately. then the results are collected
-          ;; and returned in order.
+          ;; elements are sent before any responses are fetched. responses
+          ;; should be in the same order requests were sent. this is a handy
+          ;; way to send a bunch of single item requests at once, but of course
+          ;; you can also make a worker than handles multiple items at the same
+          ;; time
 
           ;; makes two async requests, one for boof and one for chuh. once
           ;; both have been sent, calls recv and collects/returns the response
           reply-one-async (mdc/as-client-async :reverse-one ep ["boof" "chuh"])
-          ;; makes three async requests, one for duh, one for [boof], and
-          ;; one for [what, now]. see the note above regarding workers that
+
+          ;; makes three async requests, one for duh, one for [boof],
+          ;; and one for [what, now]. this is a decent way to send a
+          ;; batch of requests that may contain multiple items.
+          ;; see the note above regarding workers that
           ;; may need to handle requests with one or more items.
           reply-more-async (mdc/as-client-async :reverse-more ep
                                                 ["duh"

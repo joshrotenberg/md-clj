@@ -21,7 +21,7 @@
 
 ;; the echo worker itself
 (def echo-http-worker
-  (mdw/new-worker "echo-http" "tcp://localhost:5555" echo-handler))
+  (mdw/new-worker :echo-http "tcp://localhost:5555" echo-handler))
 
 ;; the client
 (def echo-http-md-client (mdc/new-client "tcp://localhost:5555"))
@@ -35,7 +35,7 @@
   (let [body (slurp* (:body request))
         request (ZMsg.)
         _ (.addString request body)
-        reply (mdc/send! echo-http-md-client "echo-http" request)]
+        reply (mdc/send! echo-http-md-client :echo-http request)]
     (-> (.toArray reply)
         first
         .getData
@@ -58,7 +58,7 @@
   (doseq [x random-strings]
     (let [request (ZMsg.)
           _ (.addString request x)
-          reply (mdc/send! echo-http-md-client "echo-http" request)]
+          reply (mdc/send! echo-http-md-client :echo-http request)]
       (is (= x (-> (.toArray reply)
                    first
                    .getData

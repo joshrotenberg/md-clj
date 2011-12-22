@@ -23,23 +23,23 @@
 (defmulti send! (fn [client service request] (class request)))
 
 (defmethod send! ZMsg [client service request]
-  (.send (:client client) service request))
+  (.send (:client client) (name service) request))
 
 (defmethod send! String [client service request]
   (let [r (ZMsg.)
         _ (.add r (ZFrame. request))]
-    (.send (:client client) service r)))
+    (.send (:client client) (name service) r)))
 
 (defmethod send! (Class/forName "[B") [client service request]
   (let [r (ZMsg.)
         _ (.add r (ZFrame. request))]
-    (.send (:client client) service r)))
+    (.send (:client client) (name service) r)))
 
 (defmethod send! ::collection [client service request]
   (let [r (ZMsg.)]
     (doseq [s request]
       (.add r (ZFrame. s)))
-    (.send (:client client) service r)))
+    (.send (:client client) (name service) r)))
 
 (defn recv
   "Receive from an asynchronous request."
