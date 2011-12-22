@@ -82,8 +82,13 @@
           reply-more-async (mdc/as-client-async :reverse-more ep
                                                 ["duh"
                                                  ["boof"]
-                                                 ["what" "now"]])]
-
+                                                 ["what" "now"]])
+          ;; you can really get your async on by firing off a bunch of async
+          ;; requests in a future and come back later for the results.
+          ft (future (mdc/as-client-async :reverse-one ep '("one" "two" "three"
+                                                            "four" "five" "six"
+                                                            "seven" "eight")))]
+      
       ;; the return values are either a single byte array or a sequence
       ;; of byte arrays, depending on what the worker function returns
 
@@ -99,7 +104,11 @@
       (is (= '("foob" "huhc")  (map #(String. %) reply-one-async)))
       (is (= "hud" (String. (first reply-more-async))))
       (is (= "foob" (String. (second reply-more-async))))
-      (is (= '("tahw" "won") (map #(String. %) (last reply-more-async)))))))
+      (is (= '("tahw" "won") (map #(String. %) (last reply-more-async))))
+      (is true (future-done? ft))
+      (is (= '("eno" "owt" "eerht" "ruof" "evif" "xis" "neves" "thgie")
+             (map #(String. %) @ft))))))
+          
 
       
 
