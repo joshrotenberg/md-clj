@@ -73,13 +73,13 @@
 
     (doseq [w echo-workers]
       (future (mdw/run w)))
-
+    
     (time
-    (doseq [x random-strings]
-      (let [reply (mdc/send! echo-client :echo-multi x)]
-        (is (= x (-> (.toArray reply)
-                           first
-                           .getData
-                           String.))))))))
+     (doseq [x random-strings]
+       (let [reply (mdc/send! echo-client :echo-multi x)]
+         (is (= x (-> (.toArray reply)
+                      first
+                      .getData
+                      String.))))))))
 
 

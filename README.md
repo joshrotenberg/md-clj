@@ -137,12 +137,14 @@ Majordomo API already written in they guide, but any language that has
 ## Examples
 
 See the tests. Most are written as useful examples:
-* echo - the standard echo scenario served up a few different ways
-* reverse - standard and DSL APIs to create some reverse worker examples, lots of comments too
-* http - an http frontended parallel echo system
+
+ * echo - the standard echo scenario served up a few different ways
+ * reverse - standard and DSL APIs to create some reverse worker examples, lots of comments too
+ * http - an http frontended parallel echo system
 
 ## TODO
-* Request/reply handling should be wrapped up a little instead of using ZMsg directly.
+
+ * Request/reply handling should be wrapped up a little instead of using ZMsg directly.
 
 ## Status
 
