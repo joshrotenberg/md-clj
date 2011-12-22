@@ -21,10 +21,10 @@
 
 ;; the echo worker itself
 (def echo-http-worker
-  (mdw/new-worker "echo-http" "tcp://localhost:5555" false echo-handler))
+  (mdw/new-worker "echo-http" "tcp://localhost:5555" echo-handler))
 
 ;; the client
-(def echo-http-md-client (mdc/new-client "tcp://localhost:5555" false))
+(def echo-http-md-client (mdc/new-client "tcp://localhost:5555"))
 
 ;; at this point we have a complete echo system for the backend.
 

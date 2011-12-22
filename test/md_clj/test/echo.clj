@@ -6,8 +6,6 @@
         re-rand)
   (:import org.zeromq.ZMsg))
 
-(def ^:dynamic *verbose* false)
-
 (defn random-strings-fixture
   [f]
   (def random-strings (repeatedly 1000 #(re-rand #"[A-Za-z0-9]{20}")))
@@ -17,17 +15,17 @@
 (use-fixtures :once random-strings-fixture)
 
 ;; start our broker in a future 
-(future (mdb/start-broker "tcp://*:5555" *verbose*))
+(future (mdb/start-broker "tcp://*:5555" false))
 
 ;; super simple echo test. the request data is copied verbatim back into the
 ;; the response, which is then tested.
 
 (deftest echo-test
   (let [echo-worker (mdw/new-worker
-                     "echo" "tcp://localhost:5555" *verbose*
+                     "echo" "tcp://localhost:5555"
                      (fn [request reply]
                        (doall (map #(.add reply %) (.toArray request)))))
-        echo-client (mdc/new-client "tcp://localhost:5555" *verbose*)]
+        echo-client (mdc/new-client "tcp://localhost:5555")]
     
     (future (mdw/run echo-worker))
     (time
@@ -43,10 +41,10 @@
 ;; all the results
 (deftest echo-async-test
   (let [echo-async-worker (mdw/new-worker
-                           "echo-async" "tcp://localhost:5555" *verbose*
+                           "echo-async" "tcp://localhost:5555"
                            (fn [request reply]
                        (doall (map #(.add reply %)  (.toArray request)))))
-        echo-async-client (mdc/new-client "tcp://localhost:5555" *verbose* true)]
+        echo-async-client (mdc/new-client "tcp://localhost:5555" true)]
 
   (future (mdw/run echo-async-worker))
 
@@ -66,12 +64,12 @@
   (let [echo-workers (repeat 10 
                        (mdw/new-worker
                         "echo-multi"
-                        "tcp://localhost:5555" *verbose*
+                        "tcp://localhost:5555"
                         (fn [request reply]
                           ;;(Thread/sleep 500)
                           (doall (map #(.add reply %)
                                       (.toArray request))))))
-        echo-client (mdc/new-client "tcp://localhost:5555" *verbose*)]
+        echo-client (mdc/new-client "tcp://localhost:5555")]
 
     (doseq [w echo-workers]
       (future (mdw/run w)))

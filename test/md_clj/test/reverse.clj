@@ -1,5 +1,6 @@
 (ns md-clj.test.reverse
   (:use clojure.test
+        md-clj.core
         re-rand)
   (:require [md-clj.broker :only [start-broker] :as mdb]
             [md-clj.worker :only [new-worker run as-worker] :as mdw]
@@ -16,8 +17,8 @@
 
 (deftest reverse-test
   (let [reverse-worker (mdw/new-worker
-                        "reverse" "tcp://localhost:5555" false reverse-fn)
-        reverse-client (mdc/new-client "tcp://localhost:5555" false)]
+                        "reverse" "tcp://localhost:5555" reverse-fn)
+        reverse-client (mdc/new-client "tcp://localhost:5555")]
     
     (future (mdw/run reverse-worker))
     (let [reply (mdc/send! reverse-client "reverse" ["bar" "foo"])]
@@ -34,7 +35,6 @@
 
 (deftest as-test
   (let [ep "tcp://localhost:5555"]
-
     ;; as-worker takes a service name keyword, an endpoint, and then
     ;; the body is the actual service function
     
@@ -43,12 +43,19 @@
                            (apply str (reverse (String. request)))))
     
     ;; this worker expects a sequence request and returns a sequence reply
+
+    ;; XXX note: if the client sends a single element collection in the request
+    ;; the worker has no idea that it is a collection, and treats it as it would
+    ;; a single item request. thats just the way life is, so workers should
+    ;; be defensive if there is a chance they may receive collections of varying
+    ;; lengths, where varying means singular or plural
     (future (mdw/as-worker :reverse-more ep
-                           (map #(apply str (reverse (String. %))) request)))
+                           (if (coll? request)
+                             (map #(apply str (reverse (String. %))) request)
+                             (apply str (reverse (String. request))))))
   
     ;; as-client takes a service name keyword, an endpoint, and the body should
     ;; return a request. the call itself will return the worker's response
-    
     (let [;; a single value string request
           reply-one (mdc/as-client :reverse-one ep "bleh")
           ;; or as an array of bytes
@@ -57,10 +64,25 @@
           reply-more (mdc/as-client :reverse-more ep '("one" "two"))
           ;; or a vector
           reply-more-vec (mdc/as-client :reverse-more ep ["one" "two"])
+          reply-more-just-one (mdc/as-client :reverse-more ep '("just"))
           ;; and you can mix strings and byte arrays
           reply-more-vec-mix (mdc/as-client :reverse-more ep [(.getBytes "one")
                                                               "two"])
-          ]
+          ;; async clients work similarly with the following exceptions:
+          ;; each element in the collection is sent independently, and all
+          ;; elements are sent immediately. then the results are collected
+          ;; and returned in order.
+
+          ;; makes two async requests, one for boof and one for chuh. once
+          ;; both have been sent, calls recv and collects/returns the response
+          reply-one-async (mdc/as-client-async :reverse-one ep ["boof" "chuh"])
+          ;; makes three async requests, one for duh, one for [boof], and
+          ;; one for [what, now]. see the note above regarding workers that
+          ;; may need to handle requests with one or more items.
+          reply-more-async (mdc/as-client-async :reverse-more ep
+                                                ["duh"
+                                                 ["boof"]
+                                                 ["what" "now"]])]
 
       ;; the return values are either a single byte array or a sequence
       ;; of byte arrays, depending on what the worker function returns
@@ -71,8 +93,13 @@
       (is (= "owt" (String. (second reply-more))))
       (is (= (map #(String. %) reply-more)
              (map #(String. %) reply-more-vec)))
+      (is (= "tsuj" (String. reply-more-just-one)))
       (is (= (map #(String. %) reply-more-vec)
-             (map #(String. %) reply-more-vec-mix))))))
+             (map #(String. %) reply-more-vec-mix)))
+      (is (= '("foob" "huhc")  (map #(String. %) reply-one-async)))
+      (is (= "hud" (String. (first reply-more-async))))
+      (is (= "foob" (String. (second reply-more-async))))
+      (is (= '("tahw" "won") (map #(String. %) (last reply-more-async)))))))
 
       
 

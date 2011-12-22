@@ -2,11 +2,12 @@
   (:import mdwrkapi
            [org.zeromq ZMsg ZFrame]))
 
+(def ^:dynamic *worker-debug* false)
 (defrecord Worker [^String service ^String endpoint ^Boolean verbose function])
 
 (defn new-worker
-  [service endpoint verbose function]
-  (Worker. service endpoint verbose function))
+  [service endpoint function]
+  (Worker. service endpoint *worker-debug* function))
 
 (defn run
   "Run the worker."
@@ -25,7 +26,7 @@
    worker implementation. The request is magically available in the
    'request' var, and the body should return the response, if any."
    [service endpoint & body]
-   `(let [worker# (mdwrkapi. ~endpoint (name ~service) false)
+   `(let [worker# (mdwrkapi. ~endpoint (name ~service) *worker-debug*)
           reply# (ZMsg.)]
       (while (not (.isInterrupted (Thread/currentThread)))
         (let [requezt# (.receive worker# reply#)
@@ -37,4 +38,3 @@
             (doall (map #(.add reply# (ZFrame. %)) repli#))
             (.add reply# (ZFrame. repli#)))))))
   
-               

@@ -4,14 +4,16 @@
            mdcliapi2
            [org.zeromq ZMsg ZFrame]))
 
+(def ^:dynamic *client-debug* false)
+
 (defrecord Client [^String endpoint ^Boolean verbose ^mdcliapi client async])
 
 (defn new-client
   "Creates and returns a new client record."
-  [endpoint verbose & async]
+  [endpoint & async]
   (if (first async)
-    (Client. endpoint verbose (mdcliapi2. endpoint verbose) false)
-    (Client. endpoint verbose (mdcliapi. endpoint verbose) false)))
+    (Client. endpoint *client-debug* (mdcliapi2. endpoint *client-debug*) false)
+    (Client. endpoint *client-debug* (mdcliapi. endpoint *client-debug*) false)))
 
 (def new-client-memoize (memoize new-client))
 
@@ -58,4 +60,23 @@
        (map #(.getData %) (.toArray response#))
        (.getData (.getFirst response#)))))
 
+(defmacro as-client-async
+  [service endpoint & body]
+  `(let [client# (new-client-memoize ~endpoint true)
+         request# (do ~@body)]
+     (doseq [r# request#]
+       (send! client# (name ~service) r#))
+     (loop [col# [] n# 0]
+       (if (<= (count request#) n#)
+         col#
+         (do
+           (let [item# (recv client#)
+                 res# (if (> (.size item#) 1)
+                          (map #(.getData %) (.toArray item#))
+                           (.getData (.getFirst item#)))]
+             (recur (conj col# res#) (+ n# 1))))))))
+
+
+
+         
 
