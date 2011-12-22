@@ -8,7 +8,7 @@
 
 (defn random-strings-fixture
   [f]
-  (def random-strings (repeatedly 1000 #(re-rand #"[A-Za-z0-9]{20}")))
+  (def random-strings (repeatedly 1 #(re-rand #"[A-Za-z0-9]{20}")))
   (f)
   ())
 
@@ -73,7 +73,8 @@
 
     (doseq [w echo-workers]
       (future (mdw/run w)))
-    
+
+    (prn (mdc/send! echo-client :echo-multi 3))
     (time
      (doseq [x random-strings]
        (let [reply (mdc/send! echo-client :echo-multi x)]

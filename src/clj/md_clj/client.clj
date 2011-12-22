@@ -23,6 +23,7 @@
 (defmulti send! (fn [client service request] (class request)))
 
 (defmethod send! ZMsg [client service request]
+  (prn client (name service) request)
   (.send (:client client) (name service) request))
 
 (defmethod send! String [client service request]
@@ -40,6 +41,9 @@
     (doseq [s request]
       (.add r (ZFrame. s)))
     (.send (:client client) (name service) r)))
+
+(defmethod send! :default [client service request]
+  (println "doesn't handle " (class request)))
 
 (defn recv
   "Receive from an asynchronous request."
