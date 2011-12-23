@@ -1,4 +1,5 @@
 (ns md-clj.worker
+  (:use md-clj.core)
   (:import mdwrkapi
            [org.zeromq ZMsg ZFrame]))
 

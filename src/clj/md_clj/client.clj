@@ -1,5 +1,6 @@
 (ns md-clj.client
   "Majordomo Client"
+  (:use md-clj.core)
   (:import mdcliapi
            mdcliapi2
            [org.zeromq ZMsg ZFrame]))
@@ -17,33 +18,9 @@
 
 (def new-client-memoize (memoize new-client))
 
-(derive clojure.lang.PersistentVector ::collection)
-(derive clojure.lang.PersistentList ::collection)
-
-(defmulti send! (fn [client service request] (class request)))
-
-(defmethod send! ZMsg [client service request]
-  (prn client (name service) request)
-  (.send (:client client) (name service) request))
-
-(defmethod send! String [client service request]
-  (let [r (ZMsg.)
-        _ (.add r (ZFrame. request))]
-    (.send (:client client) (name service) r)))
-
-(defmethod send! (Class/forName "[B") [client service request]
-  (let [r (ZMsg.)
-        _ (.add r (ZFrame. request))]
-    (.send (:client client) (name service) r)))
-
-(defmethod send! ::collection [client service request]
-  (let [r (ZMsg.)]
-    (doseq [s request]
-      (.add r (ZFrame. s)))
-    (.send (:client client) (name service) r)))
-
-(defmethod send! :default [client service request]
-  (println "doesn't handle " (class request)))
+(defn send!
+  [client service request]
+  (.send (:client client) (name service) (to-zmsg request)))
 
 (defn recv
   "Receive from an asynchronous request."
@@ -57,12 +34,10 @@
 
 (defmacro as-client
   [service endpoint & body]
-  `(let [client# (new-client-memoize ~endpoint false)
-         request# (do ~@body)
-         response# (send! client# (name ~service) request#)]
-     (if (> (.size response#) 1)
-       (map #(.getData %) (.toArray response#))
-       (.getData (.getFirst response#)))))
+     `(let [client# (new-client-memoize ~endpoint false)
+            request# (do ~@body)
+            response# (send! client# (name ~service) request#)]
+        (from-zmsg response# *return-type*)))
 
 (defmacro as-client-async
   [service endpoint & body]

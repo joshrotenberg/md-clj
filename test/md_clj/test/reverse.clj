@@ -56,7 +56,8 @@
   
     ;; as-client takes a service name keyword, an endpoint, and the body should
     ;; return a request. the call itself will return the worker's response
-    (let [;; a single value string request
+    (let [
+          ;; a single value string request
           reply-one (mdc/as-client :reverse-one ep "bleh")
           ;; or as an array of bytes
           reply-one-bytes (mdc/as-client :reverse-one ep (.getBytes "bleh"))

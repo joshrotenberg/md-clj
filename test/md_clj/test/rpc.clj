@@ -15,7 +15,7 @@
     (future (mdw/as-worker :clj-rpc ep
                            (eval (read-string (String. request)))))
 
-    (let [f (mdc/as-client :clj-rpc ep (str '((comp str +) 8 8 8)))]
-
-      (is (= "24" (String. f))))))
+    (let [f (with-return-type :as-number
+              (mdc/as-client :clj-rpc ep (str '((comp str +) 8 8 8))))]
+      (is (= 24 f)))))
 

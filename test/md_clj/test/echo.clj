@@ -74,7 +74,6 @@
     (doseq [w echo-workers]
       (future (mdw/run w)))
 
-    (prn (mdc/send! echo-client :echo-multi 3))
     (time
      (doseq [x random-strings]
        (let [reply (mdc/send! echo-client :echo-multi x)]
