@@ -1,4 +1,5 @@
 (ns md-clj.worker
+  "Majordomo Worker"
   (:use md-clj.core)
   (:import mdwrkapi
            [org.zeromq ZMsg ZFrame]))
@@ -7,6 +8,10 @@
 (defrecord Worker [^String service ^String endpoint ^Boolean verbose function])
 
 (defn new-worker
+  "Create a new worker. Takes a service name keyword, an endpoint (broker)
+   to connect to, and a function that accepts two arguments: the request and
+   response, both being ZMsg objects. The function should populate the response
+   manually, but any return value will be ignored."
   [service endpoint function]
   (Worker. (name service) endpoint *worker-debug* function))
 
@@ -31,9 +36,10 @@
           reply# (ZMsg.)]
       (while (not (.isInterrupted (Thread/currentThread)))
         (let [requezt# (.receive worker# reply#)
-              ~'request (if (> (.size requezt#) 1)
-                          (map #(.getData %) (.toArray requezt#))
-                          (.getData (.getFirst requezt#)))
+              ;;~'request (if (> (.size requezt#) 1)
+              ;;(map #(.getData %) (.toArray requezt#))
+              ;;(.getData (.getFirst requezt#)))
+              ~'request (from-zmsg requezt# *return-type*)
               repli# (do ~@body)]
           (if (seq? repli#)
             (doall (map #(.add reply# (ZFrame. %)) repli#))

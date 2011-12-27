@@ -141,6 +141,7 @@ See the tests. Most are written as useful examples:
  * echo - the standard echo scenario served up a few different ways
  * reverse - standard and DSL APIs to create some reverse worker examples, lots of comments too
  * http - an http frontended parallel echo system
+ * rpc - some contrived RPC examples
 
 ## TODO
 

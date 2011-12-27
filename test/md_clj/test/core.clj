@@ -3,7 +3,6 @@
         clojure.test)
   (:import [org.zeromq ZMsg ZFrame]))
 
-
 (deftest to-zmsg-test
   (let [zmsg (to-zmsg (doto (ZMsg.) (.add (ZFrame. "something"))))
         zframe (to-zmsg (ZFrame. "something else"))
@@ -61,26 +60,26 @@
   (is (= '("foo" "baz") (map #(String. %) (from-zmsg (to-zmsg ["foo" "baz"]) :as-bytes))))
   )
 
-(deftest with-return-type-test
-    (with-return-type :as-bytes
+(deftest with-message-type-test
+    (with-message-type :as-bytes
     (is (= (Class/forName "[B") (class (from-zmsg (to-zmsg "2"))))))
-  (with-return-type :as-string
+  (with-message-type :as-string
     (is (= java.lang.String (class (from-zmsg (to-zmsg "2"))))))
-  (with-return-type :as-number
+  (with-message-type :as-number
     (is (= java.lang.Long (class (from-zmsg (to-zmsg "2"))))))
-  (with-return-type :as-zmsg
+  (with-message-type :as-zmsg
     (is (= org.zeromq.ZMsg (class (from-zmsg (to-zmsg "2"))))))
 
-  (with-return-type :as-bytes
+  (with-message-type :as-bytes
     (is (= (Class/forName "[B")
            (class (first (from-zmsg (to-zmsg ["2" "3"])))))))
-  (with-return-type :as-string
+  (with-message-type :as-string
     (is (= java.lang.String
            (class (first (from-zmsg (to-zmsg ["2" "3"])))))))
-  (with-return-type :as-number
+  (with-message-type :as-number
     (is (= java.lang.Long
            (class (first (from-zmsg (to-zmsg ["2" "3"])))))))
-  (with-return-type :as-zmsg
+  (with-message-type :as-zmsg
     (is (= org.zeromq.ZMsg
            (class (from-zmsg (to-zmsg ["2" "3"]))))))
   )

@@ -86,10 +86,11 @@
           ;; batch of requests that may contain multiple items.
           ;; see the note above regarding workers that
           ;; may need to handle requests with one or more items.
-          reply-more-async (mdc/as-client-async :reverse-more ep
-                                                ["duh"
-                                                 ["boof"]
-                                                 ["what" "now"]])
+          reply-more-async (with-message-type :as-string
+                             (mdc/as-client-async :reverse-more ep
+                                                  ["duh"
+                                                   ["boof"]
+                                                   ["what" "now"]]))
           ;; you can really get your async on by firing off a bunch of async
           ;; requests in a future and come back later for the results.
           ft (future (mdc/as-client-async :reverse-one ep '("one" "two" "three"
@@ -109,9 +110,9 @@
       (is (= (map #(String. %) reply-more-vec)
              (map #(String. %) reply-more-vec-mix)))
       (is (= '("foob" "huhc")  (map #(String. %) reply-one-async)))
-      (is (= "hud" (String. (first reply-more-async))))
-      (is (= "foob" (String. (second reply-more-async))))
-      (is (= '("tahw" "won") (map #(String. %) (last reply-more-async))))
+      (is (= "hud" (first reply-more-async)))
+      (is (= "foob" (second reply-more-async)))
+      (is (= '("tahw" "won") (last reply-more-async)))
       (is true (future-done? ft))
       (is (= '("eno" "owt" "eerht" "ruof" "evif" "xis" "neves" "thgie")
              (map #(String. %) @ft))))))

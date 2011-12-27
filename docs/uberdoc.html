@@ -2527,68 +2527,178 @@ $(document).ready(function() {
 
 })
 </script><title>md-clj -- Marginalia</title></head><body><table><tr><td class="docs"><div class="header"><h1 class="project-name">md-clj</h1><h2 class="project-version">0.0.1</h2><br /><p>0MQ Majordomo Protocol Wrapper</p>
-</div><div class="dependencies"><h3>dependencies</h3><table><tr><td class="dep-name">clojure</td><td class="dotted"><hr /></td><td class="dep-version">1.3.0</td></tr><tr><td class="dep-name">jzmq</td><td class="dotted"><hr /></td><td class="dep-version">2.1.0</td></tr></table></div><div class="dependencies"><h3>dev dependencies</h3><table><tr><td class="dep-name">lein-marginalia</td><td class="dotted"><hr /></td><td class="dep-version">0.6.1</td></tr><tr><td class="dep-name">re-rand</td><td class="dotted"><hr /></td><td class="dep-version">0.1.0</td></tr><tr><td class="dep-name">compojure</td><td class="dotted"><hr /></td><td class="dep-version">0.6.5</td></tr><tr><td class="dep-name">ring/ring-jetty-adapter</td><td class="dotted"><hr /></td><td class="dep-version">0.3.9</td></tr><tr><td class="dep-name">clj-http</td><td class="dotted"><hr /></td><td class="dep-version">0.2.6</td></tr></table></div></td><td class="codes" style="text-align: center; vertical-align: middle;color: #666;padding-right:20px"><br /><br /><br />(this space intentionally left almost blank)</td></tr><tr><td class="docs"><div class="toc"><a name="toc"><h3>namespaces</h3></a><ul><li><a href="#md-clj.broker">md-clj.broker</a></li><li><a href="#md-clj.client">md-clj.client</a></li><li><a href="#md-clj.core">md-clj.core</a></li><li><a href="#md-clj.worker">md-clj.worker</a></li></ul></div></td><td class="codes">&nbsp;</td></tr><tr><td class="docs"><div class="docs-header"><a class="anchor" href="#md-clj.broker" name="md-clj.broker"><h1 class="project-name">md-clj.broker</h1><a class="toc-link" href="#toc">toc</a></a></div></td><td class="codes" /></tr><tr><td class="docs">
+</div><div class="dependencies"><h3>dependencies</h3><table><tr><td class="dep-name">clojure</td><td class="dotted"><hr /></td><td class="dep-version">1.3.0</td></tr><tr><td class="dep-name">jzmq</td><td class="dotted"><hr /></td><td class="dep-version">2.1.0</td></tr></table></div><div class="dependencies"><h3>dev dependencies</h3><table><tr><td class="dep-name">lein-marginalia</td><td class="dotted"><hr /></td><td class="dep-version">0.6.1</td></tr><tr><td class="dep-name">re-rand</td><td class="dotted"><hr /></td><td class="dep-version">0.1.0</td></tr><tr><td class="dep-name">compojure</td><td class="dotted"><hr /></td><td class="dep-version">0.6.5</td></tr><tr><td class="dep-name">ring/ring-jetty-adapter</td><td class="dotted"><hr /></td><td class="dep-version">0.3.9</td></tr><tr><td class="dep-name">clj-http</td><td class="dotted"><hr /></td><td class="dep-version">0.2.6</td></tr></table></div></td><td class="codes" style="text-align: center; vertical-align: middle;color: #666;padding-right:20px"><br /><br /><br />(this space intentionally left almost blank)</td></tr><tr><td class="docs"><div class="toc"><a name="toc"><h3>namespaces</h3></a><ul><li><a href="#md-clj.broker">md-clj.broker</a></li><li><a href="#md-clj.client">md-clj.client</a></li><li><a href="#md-clj.core">md-clj.core</a></li><li><a href="#md-clj.worker">md-clj.worker</a></li></ul></div></td><td class="codes">&nbsp;</td></tr><tr><td class="docs"><div class="docs-header"><a class="anchor" href="#md-clj.broker" name="md-clj.broker"><h1 class="project-name">md-clj.broker</h1><a class="toc-link" href="#toc">toc</a></a></div></td><td class="codes" /></tr><tr><td class="docs"><p>Majordomo Broker</p>
 </td><td class="codes" /><pre class="brush: clojure">(ns md-clj.broker
-  (:import mdbroker))</pre></tr><tr><td class="docs">
+  (:import mdbroker))</pre></tr><tr><td class="docs"><p>The broker sits between the client(s) and the worker(s), delegating tasks
+from the client to an available worker and returning the worker's response
+back to the client. Aside from the specified service requested by the client,
+the broker has little interest in the payload itself. Current, the only
+task necessary from the user's perspective is to start the broker on
+the specified endpoint:</p>
+</td><td class="codes" /></tr><tr><td class="docs">
 </td><td class="codes" /><pre class="brush: clojure">(defn start-broker
-  &quot;Start a broker on the specified endpoint.&quot;
+  &quot;Start a broker on the specified endpoint, i.e.:
+   (start-broker &quot;tcp://*:5555&quot; false)&quot;
   [endpoint verbose]
   (let [broker (mdbroker. verbose)]
     (doto broker
       (.bind endpoint)
-      (.mediate))))</pre></tr><tr><td class="spacer docs">&nbsp;</td><td class="codes" /></tr><tr><td class="docs"><div class="docs-header"><a class="anchor" href="#md-clj.client" name="md-clj.client"><h1 class="project-name">md-clj.client</h1><a class="toc-link" href="#toc">toc</a></a></div></td><td class="codes" /></tr><tr><td class="docs"><h2>A new way to think about programs</h2>
-</td><td class="codes" /></tr><tr><td class="docs">
+      (.mediate))))</pre></tr><tr><td class="spacer docs">&nbsp;</td><td class="codes" /></tr><tr><td class="docs"><div class="docs-header"><a class="anchor" href="#md-clj.client" name="md-clj.client"><h1 class="project-name">md-clj.client</h1><a class="toc-link" href="#toc">toc</a></a></div></td><td class="codes" /></tr><tr><td class="docs"><p>Majordomo Client</p>
 </td><td class="codes" /><pre class="brush: clojure">(ns md-clj.client
+  (:use md-clj.core)
   (:import mdcliapi
            mdcliapi2
-           org.zeromq.ZMsg))</pre></tr><tr><td class="docs">
+           [org.zeromq ZMsg ZFrame]))</pre></tr><tr><td class="docs">
+</td><td class="codes" /><pre class="brush: clojure">(def ^:dynamic *client-debug* false)</pre></tr><tr><td class="docs">
 </td><td class="codes" /><pre class="brush: clojure">(defrecord Client [^String endpoint ^Boolean verbose ^mdcliapi client async])</pre></tr><tr><td class="docs">
 </td><td class="codes" /><pre class="brush: clojure">(defn new-client
   &quot;Creates and returns a new client record.&quot;
-  [endpoint verbose &amp; async]
+  [endpoint &amp; async]
   (if (first async)
-    (Client. endpoint verbose (mdcliapi2. endpoint verbose) false)
-    (Client. endpoint verbose (mdcliapi. endpoint verbose) false)))</pre></tr><tr><td class="docs">
-</td><td class="codes" /><pre class="brush: clojure">(defn send*
-  &quot;Sends a request given a Client record, a service name an a ZMsg request.&quot;
-  [^Client this ^String service ^ZMsg request]
-  (.send (:client this) service request))</pre></tr><tr><td class="docs">
-</td><td class="codes" /><pre class="brush: clojure">(defn send-strings
-  &quot;Sends a request given a Client record, a service name a sequence of strings.&quot;
-  [^Client this ^String service strings]
-  (let [request (ZMsg.)]
-    (doseq [s strings]
-      (.addString request s))
-      (.send (:client this) service request)))</pre></tr><tr><td class="docs"><p>dude</p>
-</td><td class="codes" /><pre class="brush: clojure">(defn recv*
+    (Client. endpoint *client-debug* (mdcliapi2. endpoint *client-debug*) false)
+    (Client. endpoint *client-debug* (mdcliapi. endpoint *client-debug*) false)))</pre></tr><tr><td class="docs">
+</td><td class="codes" /><pre class="brush: clojure">(def new-client-memoize (memoize new-client))</pre></tr><tr><td class="docs">
+</td><td class="codes" /><pre class="brush: clojure">(defn send!
+  [client service request]
+  (.send (:client client) (name service) (to-zmsg request)))</pre></tr><tr><td class="docs">
+</td><td class="codes" /><pre class="brush: clojure">(defn recv
   &quot;Receive from an asynchronous request.&quot;
   [this]
   (.recv (:client this)))</pre></tr><tr><td class="docs">
-</td><td class="codes" /><pre class="brush: clojure">(defn destroy*
+</td><td class="codes" /><pre class="brush: clojure">(defn destroy
   &quot;Destroy the Client.&quot;
   [this]
-  (.destroy (:client this)))</pre></tr><tr><td class="spacer docs">&nbsp;</td><td class="codes" /></tr><tr><td class="docs"><div class="docs-header"><a class="anchor" href="#md-clj.core" name="md-clj.core"><h1 class="project-name">md-clj.core</h1><a class="toc-link" href="#toc">toc</a></a></div></td><td class="codes" /></tr><tr><td class="docs">
-</td><td class="codes" /><pre class="brush: clojure">(ns md-clj.core)</pre></tr><tr><td class="docs">
-</td><td class="codes" /><pre class="brush: clojure">(defn hi
-  &quot;I don't do a whole lot.&quot;
-  []
-  (println &quot;Hello, World!&quot;))</pre></tr><tr><td class="spacer docs">&nbsp;</td><td class="codes" /></tr><tr><td class="docs"><div class="docs-header"><a class="anchor" href="#md-clj.worker" name="md-clj.worker"><h1 class="project-name">md-clj.worker</h1><a class="toc-link" href="#toc">toc</a></a></div></td><td class="codes" /></tr><tr><td class="docs">
+  (.destroy (:client this)))</pre></tr><tr><td class="docs">
+</td><td class="codes" /><pre class="brush: clojure">(defmacro as-client
+  [service endpoint &amp; body]
+     `(let [client# (new-client-memoize ~endpoint false)
+            request# (do ~@body)
+            response# (send! client# (name ~service) request#)]
+        (from-zmsg response# *return-type*)))</pre></tr><tr><td class="docs">
+</td><td class="codes" /><pre class="brush: clojure">(defmacro as-client-async
+  [service endpoint &amp; body]
+  `(let [client# (new-client-memoize ~endpoint true)
+         request# (do ~@body)]
+     (doseq [r# request#]
+       (send! client# (name ~service) r#))
+     (loop [col# [] n# 0]
+       (if (&lt;= (count request#) n#)
+         col#
+         (do
+           (let [item# (recv client#)
+                 res# (if (&gt; (.size item#) 1)
+                          (map #(.getData %) (.toArray item#))
+                           (.getData (.getFirst item#)))]
+             (recur (conj col# res#) (+ n# 1))))))))</pre></tr><tr><td class="spacer docs">&nbsp;</td><td class="codes" /></tr><tr><td class="docs"><div class="docs-header"><a class="anchor" href="#md-clj.core" name="md-clj.core"><h1 class="project-name">md-clj.core</h1><a class="toc-link" href="#toc">toc</a></a></div></td><td class="codes" /></tr><tr><td class="docs">
+</td><td class="codes" /><pre class="brush: clojure">(ns md-clj.core
+  (:import [org.zeromq ZMsg ZFrame]))</pre></tr><tr><td class="docs">
+</td><td class="codes" /><pre class="brush: clojure">(def ^:dynamic *debug* false)
+(def ^{:dynamic true} *return-type* :as-bytes)</pre></tr><tr><td class="docs">
+</td><td class="codes" /><pre class="brush: clojure">(derive clojure.lang.PersistentVector ::collection)
+(derive clojure.lang.PersistentList ::collection)
+(derive (Class/forName &quot;[Ljava.lang.String;&quot;) ::collection)</pre></tr><tr><td class="docs"><p>XXX: we stringify everything in the collections above, but str on
+a byte array isn't what we want, so handle [[B seperately
+(derive (Class/forName "[[B") ::collection)</p>
+</td><td class="codes" /></tr><tr><td class="docs"><p>take various types and create a ZMsg for transport</p>
+</td><td class="codes" /><pre class="brush: clojure">(defmulti to-zmsg class)</pre></tr><tr><td class="docs">
+</td><td class="codes" /><pre class="brush: clojure">(defmethod to-zmsg ZMsg [z] z)</pre></tr><tr><td class="docs">
+</td><td class="codes" /><pre class="brush: clojure">(defmethod to-zmsg ZFrame [f]
+  (doto (ZMsg.) (.add f)))</pre></tr><tr><td class="docs">
+</td><td class="codes" /><pre class="brush: clojure">(defmethod to-zmsg (Class/forName &quot;[Lorg.zeromq.ZFrame;&quot;) [a]
+  (let [m (ZMsg.)]
+    (doseq [item a]
+      (.add m item))
+    m))</pre></tr><tr><td class="docs">
+</td><td class="codes" /><pre class="brush: clojure">(defmethod to-zmsg String [s]
+  (to-zmsg (.getBytes s)))</pre></tr><tr><td class="docs">
+</td><td class="codes" /><pre class="brush: clojure">(defmethod to-zmsg (Class/forName &quot;[B&quot;) [b]
+  (doto (ZMsg.) (.add (ZFrame. b))))</pre></tr><tr><td class="docs">
+</td><td class="codes" /><pre class="brush: clojure">(defmethod to-zmsg ::collection [c]
+  (let [m (ZMsg.)]
+    (doseq [item c]
+      (condp = (type item)
+        java.lang.String (.add m (ZFrame. item))
+        (Class/forName &quot;[B&quot;) (.add m (ZFrame. item))
+        (.add m (ZFrame. (str item))))) ;; stringify anything else
+    m))</pre></tr><tr><td class="docs">
+</td><td class="codes" /><pre class="brush: clojure">(defmethod to-zmsg (Class/forName &quot;[[B&quot;) [c]
+  (let [m (ZMsg.)]
+    (doseq [item c]
+      (.add m (ZFrame. item)))
+    m))</pre></tr><tr><td class="docs">
+</td><td class="codes" /><pre class="brush: clojure">(defmethod to-zmsg java.lang.Number [n]
+  (to-zmsg (str n)))</pre></tr><tr><td class="docs">
+</td><td class="codes" /><pre class="brush: clojure">(defmethod to-zmsg (Class/forName &quot;[Ljava.lang.Number;&quot;) [a]
+   (let [m (ZMsg.)]
+     (doseq [item a]
+       (.add m (ZFrame. (str item))))
+     m))</pre></tr><tr><td class="docs">
+</td><td class="codes" /><pre class="brush: clojure">(defmethod to-zmsg :default [a]
+  (throw (Exception. (format &quot;to-zmsg doesn't handle %s&quot; (class a)))))</pre></tr><tr><td class="docs">
+</td><td class="codes" /><pre class="brush: clojure">(defmacro with-return-type
+  &quot;Specify the type for the elements returned in the response if the default
+  of byte array doesn't do it for you. Options are passed directly to from-zmsg:
+  :as-string - all response items will be strings
+  :as-number - all response items will be parsed as numbers
+  :as-bytes - the default, all items will be byte arrays
+  :as-zmsg - the unmolested raw ZMsg object&quot;
+  [return-type &amp; body]
+  `(binding [*return-type* ~return-type]
+     ~@body))</pre></tr><tr><td class="docs">
+</td><td class="codes" /><pre class="brush: clojure">(defn from-zmsg
+  &quot;Converts a ZMsg to a Clojure type. If the message has multiple frames,
+   a collection is returned, otherwise a single value is returned. By default,
+   returns items as a byte array. Specify :as-number to parse the result as a
+   number (using read-string), :as-string to return a string, or :as-bytes
+   to explicity use a byte array. :as-zmsg can be specified to get the raw
+   ZMsg object itself.&quot;
+  [z &amp; [as]]
+  (let [the-type (if (nil? as) *return-type* as)]
+    (if (= the-type :as-zmsg)
+      z
+      (let [f (condp = the-type
+                :as-number (fn [i] (read-string (.toString i)))
+                :as-string (fn [s] (.toString s))
+                :as-bytes (fn [b] (.getData b))
+                (fn [b] (.getData b)))]
+        (let [res (map f (.toArray z))]
+          (if (&gt; (count res) 1)
+            res
+            (first res)))))))</pre></tr><tr><td class="spacer docs">&nbsp;</td><td class="codes" /></tr><tr><td class="docs"><div class="docs-header"><a class="anchor" href="#md-clj.worker" name="md-clj.worker"><h1 class="project-name">md-clj.worker</h1><a class="toc-link" href="#toc">toc</a></a></div></td><td class="codes" /></tr><tr><td class="docs">
 </td><td class="codes" /><pre class="brush: clojure">(ns md-clj.worker
+  (:use md-clj.core)
   (:import mdwrkapi
-           org.zeromq.ZMsg))</pre></tr><tr><td class="docs">
-</td><td class="codes" /><pre class="brush: clojure">(defprotocol WorkerProtocol
-  (run [this]))</pre></tr><tr><td class="docs">
-</td><td class="codes" /><pre class="brush: clojure">(defrecord Worker [^String service ^String endpoint ^Boolean verbose function]
-  WorkerProtocol
-  (run [this]
-    (let [worker (mdwrkapi. (:endpoint this)
-                            (:service this)
-                            (:verbose this))
-          reply (ZMsg.)]
+           [org.zeromq ZMsg ZFrame]))</pre></tr><tr><td class="docs">
+</td><td class="codes" /><pre class="brush: clojure">(def ^:dynamic *worker-debug* false)
+(defrecord Worker [^String service ^String endpoint ^Boolean verbose function])</pre></tr><tr><td class="docs">
+</td><td class="codes" /><pre class="brush: clojure">(defn new-worker
+  [service endpoint function]
+  (Worker. (name service) endpoint *worker-debug* function))</pre></tr><tr><td class="docs">
+</td><td class="codes" /><pre class="brush: clojure">(defn run
+  &quot;Run the worker.&quot;
+  [^Worker this]
+  (let [worker (mdwrkapi. (:endpoint this)
+                          (:service this)
+                          (:verbose this))
+        reply (ZMsg.)]
+    (while (not (.isInterrupted (Thread/currentThread)))
+      (let [request (.receive worker reply)]
+        (do
+          ((:function this) request reply))))))</pre></tr><tr><td class="docs">
+</td><td class="codes" /><pre class="brush: clojure"> (defmacro as-worker
+   &quot;Given a service name keyword, an endpoint, runs the body as the
+   worker implementation. The request is magically available in the
+   'request' var, and the body should return the response, if any.&quot;
+   [service endpoint &amp; body]
+   `(let [worker# (mdwrkapi. ~endpoint (name ~service) *worker-debug*)
+          reply# (ZMsg.)]
       (while (not (.isInterrupted (Thread/currentThread)))
-        (let [request (.receive worker reply)]
-          (do
-            ((:function this) request reply)))))))</pre></tr><tr><td class="docs">
-</td><td class="codes" /><pre class="brush: clojure">(defn new-worker [service endpoint verbose function]
-  (Worker. service endpoint verbose function))</pre></tr><tr><td class="spacer docs">&nbsp;</td><td class="codes" /></tr></table><div class="footer">Generated by <a href="https://github.com/fogus/marginalia">Marginalia</a>.&nbsp;&nbsp;Syntax highlighting provided by Alex Gorbatchev's <a href="http://alexgorbatchev.com/SyntaxHighlighter/">SyntaxHighlighter</a><div id="floating-toc"><ul><li class="floating-toc-li" id="floating-toc_md-clj.broker">md-clj.broker</li><li class="floating-toc-li" id="floating-toc_md-clj.client">md-clj.client</li><li class="floating-toc-li" id="floating-toc_md-clj.core">md-clj.core</li><li class="floating-toc-li" id="floating-toc_md-clj.worker">md-clj.worker</li></ul></div></div><script type="text/javascript">SyntaxHighlighter.defaults['gutter'] = false;
+        (let [requezt# (.receive worker# reply#)
+              ~'request (if (&gt; (.size requezt#) 1)
+                          (map #(.getData %) (.toArray requezt#))
+                          (.getData (.getFirst requezt#)))
+              repli# (do ~@body)]
+          (if (seq? repli#)
+            (doall (map #(.add reply# (ZFrame. %)) repli#))
+            (.add reply# (ZFrame. repli#)))))))</pre></tr><tr><td class="spacer docs">&nbsp;</td><td class="codes" /></tr></table><div class="footer">Generated by <a href="https://github.com/fogus/marginalia">Marginalia</a>.&nbsp;&nbsp;Syntax highlighting provided by Alex Gorbatchev's <a href="http://alexgorbatchev.com/SyntaxHighlighter/">SyntaxHighlighter</a><div id="floating-toc"><ul><li class="floating-toc-li" id="floating-toc_md-clj.broker">md-clj.broker</li><li class="floating-toc-li" id="floating-toc_md-clj.client">md-clj.client</li><li class="floating-toc-li" id="floating-toc_md-clj.core">md-clj.core</li><li class="floating-toc-li" id="floating-toc_md-clj.worker">md-clj.worker</li></ul></div></div><script type="text/javascript">SyntaxHighlighter.defaults['gutter'] = false;
        SyntaxHighlighter.all()</script></body></html>

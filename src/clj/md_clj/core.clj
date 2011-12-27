@@ -59,9 +59,10 @@
 (defmethod to-zmsg :default [a]
   (throw (Exception. (format "to-zmsg doesn't handle %s" (class a)))))
 
-(defmacro with-return-type
-  "Specify the type for the elements returned in the response if the default
-  of byte array doesn't do it for you. Options are passed directly to from-zmsg:
+(defmacro with-message-type
+  "Specify the type for the elements in a request to or response from
+   a worker function if the default of byte array doesn't do it for
+   you. Options are passed directly to from-zmsg:
   :as-string - all response items will be strings
   :as-number - all response items will be parsed as numbers
   :as-bytes - the default, all items will be byte arrays
