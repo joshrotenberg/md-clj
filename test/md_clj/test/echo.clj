@@ -28,14 +28,13 @@
         echo-client (mdc/new-client "tcp://localhost:5555")]
     
     (future (mdw/run echo-worker))
-    (time
-     (doseq [x random-strings]
-       (let [reply (mdc/send! echo-client :echo x)]
-         
+    (doseq [x random-strings]
+      (let [reply (mdc/send! echo-client :echo x)]
+        
         (is (= x (-> (.toArray reply)
                      first
                      .getData
-                     String.))))))))
+                     String.)))))))
 
 ;; test an async client. send! a bunch of request. then go back and get
 ;; all the results
@@ -73,13 +72,12 @@
 
     (doseq [w echo-workers]
       (future (mdw/run w)))
-
-    (time
-     (doseq [x random-strings]
-       (let [reply (mdc/send! echo-client :echo-multi x)]
-         (is (= x (-> (.toArray reply)
-                      first
-                      .getData
-                      String.))))))))
+    
+    (doseq [x random-strings]
+      (let [reply (mdc/send! echo-client :echo-multi x)]
+        (is (= x (-> (.toArray reply)
+                     first
+                     .getData
+                     String.)))))))
 
 

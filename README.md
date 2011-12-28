@@ -68,6 +68,17 @@ Note that this has nothing to do with the mailing list called Majordomo:
 This is a Clojure wrapper around the Java implementation. I started a
 pure Clojure implementation, but this works right now.
 
+## Requirements
+
+Get, build and install ZeroMQ: http://www.zeromq.org/intro:get-the-software
+
+Get, build and install jzmq: https://github.com/zeromq/jzmq
+
+In your project.clj:
+
+```
+[md-clj "0.0.1"]
+```
 ## Usage
 
 The Majordomo Pattern provides a framework for building "Reliable
