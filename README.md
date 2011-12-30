@@ -50,12 +50,13 @@ architecture without too much ceremony:
 ## 0MQ Majordomo
 
 See:
-* http://rfc.zeromq.org/spec:7 
-* http://zguide.zeromq.org/page:all#Service-Oriented-Reliable-Queuing-Majordomo-Pattern
+
+ * http://rfc.zeromq.org/spec:7 
+ * http://zguide.zeromq.org/page:all#Service-Oriented-Reliable-Queuing-Majordomo-Pattern
 
 for the "possibly too long; (but) did read" explanation of the Majordomo system.
 
-Note that this has nothing to do with the mailing list called Majordomo:
+Note that this has nothing to do with the mailing list software called Majordomo:
 
 > The Majordomo Protocol (MDP) defines a reliable service-oriented
 > request-reply dialog between a set of client applications, a broker
@@ -156,11 +157,14 @@ See the tests. Most are written as useful examples:
 
 ## TODO
 
- * Request/reply handling should be wrapped up a little instead of using ZMsg directly.
+ * API Docs.
+ * Native Clojure MD implementation on the lower level.
+ * Needs a better name.
 
 ## Status
-
-* Changing a lot.
+ 
+ * Tests/examples are working, haven't tried scaling up for reals in a multi host environment.
+ * API still changing.
 
 ## License
 
