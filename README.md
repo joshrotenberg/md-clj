@@ -13,7 +13,7 @@ architecture without too much ceremony:
 ```clojure
 ;; the main app
 (ns my.app.core
-    (:requite md-clj.broker))
+    (:require md-clj.broker))
 
 (defn -main
       [& args]
